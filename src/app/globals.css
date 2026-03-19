@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --font-belleza: "Belleza", serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Dajusticia Brand Identity Tokens */
+  --color-background: #FFFFFF;
+  --color-foreground: #4A4A4A;
+  
+  --color-card: #FFFFFF;
+  --color-card-foreground: #4A4A4A;
+  
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #012340;
+  
+  --color-primary: #012340; /* Navy */
+  --color-primary-foreground: #FFFFFF;
+  
+  --color-secondary: #F8F9FA; /* Extra Light Gray */
+  --color-secondary-foreground: #012340;
+  
+  --color-muted: #F8F9FA;
+  --color-muted-foreground: #4A4A4A;
+  
+  --color-accent: #C59D5F; /* Gold / Amber */
+  --color-accent-foreground: #FFFFFF;
+  
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #FFFFFF;
+  
+  --color-border: #e5e7eb;
+  --color-input: #f3f4f6;
+  --color-ring: #012340;
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-inter antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-belleza;
+  }
+}
+
+/* Brand Panel Style */
+.brand-panel {
+  background: #FFFFFF;
+  border: 1px solid rgba(1, 35, 64, 0.08);
+  box-shadow: 0 10px 40px rgba(1, 35, 64, 0.05);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(1, 35, 64, 0.1);
+}
+
+/* Scrollbar styling - Modernized */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+}
+::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 10px;
+  border: 3px solid #FFFFFF;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
