@@ -4,7 +4,14 @@ import { useState } from "react";
 import { Users, Plus, Trash2, Calendar, User as UserIcon } from "lucide-react";
 import { addFamilyMember } from "@/lib/actions/pensioner";
 
-export function FamilyGroupManager({ cedula, initialMembers }: { cedula: string, initialMembers: any[] }) {
+interface Member {
+  memberId: string;
+  firstNames: string | null;
+  relationship: string | null;
+  birthDate: string | null;
+}
+
+export function FamilyGroupManager({ cedula, initialMembers }: { cedula: string, initialMembers: Member[] }) {
   const [members, setMembers] = useState(initialMembers);
   const [showForm, setShowForm] = useState(false);
 

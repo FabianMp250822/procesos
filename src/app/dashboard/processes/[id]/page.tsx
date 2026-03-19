@@ -33,6 +33,30 @@ import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { AnnotationModal } from "@/components/AnnotationModal";
 
+interface FamilyMember {
+  firstNames: string | null;
+  relationship: string | null;
+}
+
+interface Annotation {
+  id: number;
+  date: string | null;
+  type: string | null;
+  visualize: string | null;
+  courts: number | null;
+  annotation: string | null;
+  proceduralStatus: string | null;
+  limitDate: string | null;
+  fileUrl: string | null;
+}
+
+interface Annex {
+  id: number;
+  fileName: string | null;
+  description: string | null;
+  r2Url: string | null;
+}
+
 export default async function ProcessDetailsPage({
   params,
 }: {
@@ -156,11 +180,11 @@ export default async function ProcessDetailsPage({
               <div className="space-y-6">
                  <div className="space-y-2">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Línea de Negocio</p>
-                    <p className="text-sm font-bold text-blue-600 uppercase">{(data as any).businessLine || '-'}</p>
+                    <p className="text-sm font-bold text-blue-600 uppercase">{(data as unknown as Record<string, unknown>).businessLine as string || '-'}</p>
                  </div>
                  <div className="space-y-2">
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Radicación Completa</p>
-                    <p className="text-sm font-mono text-slate-600">{(data as any).radicadoUlt || '-'}</p>
+                    <p className="text-sm font-mono text-slate-600">{(data as unknown as Record<string, unknown>).radicadoUlt as string || '-'}</p>
                  </div>
               </div>
             </div>
@@ -180,7 +204,7 @@ export default async function ProcessDetailsPage({
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
                   <p className="text-[9px] font-black text-slate-400 uppercase">Magistrado Corte</p>
-                  <p className="text-xs font-bold text-slate-700 italic">{(data as any).magistrateCorte || 'PENDIENTE'}</p>
+                  <p className="text-xs font-bold text-slate-700 italic">{((data as unknown as Record<string, unknown>).magistrateCorte as string) || 'PENDIENTE'}</p>
                 </div>
               </div>
             </section>
@@ -288,7 +312,7 @@ export default async function ProcessDetailsPage({
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Grupo Familiar</h4>
                   </div>
                   <div className="space-y-3">
-                    {data.family && data.family.slice(0, 3).map((member: any, i: number) => (
+                    {data.family && (data.family as FamilyMember[]).slice(0, 3).map((member: FamilyMember, i: number) => (
                       <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
                         <div>
                           <p className="text-xs font-bold text-slate-800 uppercase">{member.firstNames}</p>
@@ -312,7 +336,7 @@ export default async function ProcessDetailsPage({
                       <div key={idx} className="space-y-2">
                         <p className="text-[9px] font-black text-blue-500 uppercase px-1">{pret.pretensionName}</p>
                         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-2">
-                          {pret.documents.slice(0, 2).map((doc: any, di: number) => (
+                          {pret.documents.slice(0, 2).map((doc, di: number) => (
                             <div key={di} className="flex items-center justify-between gap-2">
                               <span className="text-[10px] font-bold text-slate-600 truncate">{doc.documentName}</span>
                               <span className={`text-[8px] font-black px-1.5 py-0.5 rounded ${doc.status === 'SI' ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{doc.status || "NO"}</span>
@@ -353,7 +377,7 @@ export default async function ProcessDetailsPage({
                {/* Vertical Line */}
                <div className="absolute left-[27px] top-2 bottom-2 w-0.5 bg-slate-100 hidden md:block"></div>
 
-               {[...data.annotations].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((note: any, idx: number) => (
+               {[...data.annotations].sort((a: Annotation, b: Annotation) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime()).map((note: Annotation) => (
                  <div key={note.id} className="relative pl-0 md:pl-16 group">
                    {/* Timeline dot */}
                    <div className="absolute left-[20px] top-1 w-4 h-4 rounded-full bg-white border-4 border-blue-500 hidden md:block z-10 group-hover:scale-125 transition-transform shadow-sm"></div>
@@ -480,7 +504,7 @@ export default async function ProcessDetailsPage({
              </form>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {data.annexes.map((file: any) => (
+                {data.annexes.map((file) => (
                   <div key={file.id} className="group p-5 bg-white border border-slate-200 rounded-3xl hover:border-emerald-500/30 hover:shadow-lg transition-all flex items-center justify-between">
                      <div className="flex items-center gap-4 overflow-hidden">
                         <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
@@ -491,7 +515,7 @@ export default async function ProcessDetailsPage({
                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-tighter mt-1">{file.description || 'Sin descripción'}</p>
                         </div>
                      </div>
-                     <a href={file.r2Url} target="_blank" className="p-3 bg-slate-50 text-slate-400 hover:bg-emerald-600 hover:text-white rounded-xl transition-all">
+                     <a href={file.filePath || undefined} target="_blank" className="p-3 bg-slate-50 text-slate-400 hover:bg-emerald-600 hover:text-white rounded-xl transition-all">
                        <ExternalLink size={18} />
                      </a>
                   </div>

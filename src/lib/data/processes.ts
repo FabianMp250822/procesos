@@ -25,7 +25,7 @@ export async function getProcessDetails(id: number) {
 
     // Fetch deceased data & family group if it's a pensioner/deceased related process
     let deceased = null;
-    let family: any[] = [];
+    let family: unknown[] = [];
     let folder = null;
     if (process.clientId) {
       const cedula = process.clientId.toString();

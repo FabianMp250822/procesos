@@ -4,10 +4,22 @@ import { useActionState } from "react";
 import { createClient } from "@/lib/actions/clients";
 import { UserPlus, Info, Briefcase, Calculator, Save, AlertCircle } from "lucide-react";
 
-export default function NewClientPage({ groups }: { groups: any[] }) {
+interface Group {
+  grupos: string;
+}
+
+export default function NewClientPage() {
   const [state, formAction, isPending] = useActionState(createClient, null);
   const months = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
   const currentYear = new Date().getFullYear();
+  const groups = [
+    { grupos: "ELECTRIFICADORA" },
+    { grupos: "COLPENSIONES" },
+    { grupos: "CORELCA" },
+    { grupos: "BAVARIA" },
+    { grupos: "GECELCA" },
+    { grupos: "TRANSELCA" }
+  ];
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-10 pb-32">
@@ -97,7 +109,7 @@ export default function NewClientPage({ groups }: { groups: any[] }) {
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">* Grupo de Cobro / Entidad</label>
               <select name="grupo" required className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 focus:ring-2 focus:ring-[#C59D5F] outline-none font-bold appearance-none">
                 <option value="">Seleccione un item...</option>
-                {groups?.map((g: any) => (
+                {groups?.map((g: Group) => (
                   <option key={g.grupos} value={g.grupos}>{g.grupos}</option>
                 ))}
               </select>

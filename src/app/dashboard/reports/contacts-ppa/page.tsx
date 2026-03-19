@@ -82,7 +82,7 @@ async function ContactsList() {
   );
 }
 
-function ContactItem({ icon: Icon, label, value, className }: { icon: any; label: string; value: string; className?: string }) {
+function ContactItem({ icon: Icon, label, value, className }: { icon: React.ElementType; label: string; value: string; className?: string }) {
   return (
     <div className="flex items-start gap-3">
       <Icon size={14} className="text-muted-foreground shrink-0 mt-0.5" />

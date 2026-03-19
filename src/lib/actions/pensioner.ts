@@ -2,7 +2,7 @@
 
 import { db } from "@/db/db.server";
 import { folders, familyGroups, deceasedData, lifeExpectancy, pensionerDocuments, clients, users } from "@/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, like } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -93,7 +93,7 @@ export async function getPensionersAdvanced(filters: {
     .limit(100);
 }
 
-export async function createPensioner(prevState: any, formData: FormData) {
+export async function createPensioner(prevState: unknown, formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("Unauthorized");
 
@@ -185,7 +185,7 @@ export async function createPensioner(prevState: any, formData: FormData) {
 
     revalidatePath("/dashboard/pensioners");
     
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create Pensioner Error:", error);
     throw error;
   }

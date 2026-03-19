@@ -2,6 +2,19 @@ import { getProcesses } from "@/lib/data/processes";
 import { Search, Plus, MoreHorizontal, Scale, Gavel, User, LayoutGrid, List as ListIcon, ChevronRight, ShieldCheck, Briefcase, Landmark } from "lucide-react";
 import Link from "next/link";
 
+interface ProcessListItem {
+  id: number;
+  folderNumber: string | null;
+  folderNumber2: string | null;
+  clientName: string | null;
+  clientId: string | number | null;
+  radicadoIni: string | null;
+  court: string | null;
+  businessLine: string | null;
+  processClass: string | null;
+  status: string | null;
+}
+
 export default async function ProcessesPage({
   searchParams,
 }: {
@@ -90,7 +103,7 @@ export default async function ProcessesPage({
                   </td>
                 </tr>
               ) : (
-                list.map((process: any) => (
+                list.map((process: ProcessListItem) => (
                   <tr key={process.id} className="hover:bg-slate-50 transition-all group border-b border-slate-50 last:border-0">
                     <td className="px-8 py-6">
                       <div className="flex flex-col">

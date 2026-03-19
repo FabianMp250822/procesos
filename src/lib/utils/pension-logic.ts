@@ -33,13 +33,13 @@ export function calculateInterval(start: Date | string, end: Date | string = new
 
   if (!startDate || !endDate) return { years: 0, months: 0, days: 0 };
 
-  let d1 = startDate.getDate();
-  let m1 = startDate.getMonth() + 1;
-  let y1 = startDate.getFullYear();
+  const d1 = startDate.getDate();
+  const m1 = startDate.getMonth() + 1;
+  const y1 = startDate.getFullYear();
 
-  let d2 = endDate.getDate();
-  let m2 = endDate.getMonth() + 1;
-  let y2 = endDate.getFullYear();
+  const d2 = endDate.getDate();
+  const m2 = endDate.getMonth() + 1;
+  const y2 = endDate.getFullYear();
 
   let years = y2 - y1;
   let months = m2 - m1;

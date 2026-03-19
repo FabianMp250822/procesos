@@ -3,6 +3,12 @@ import { Users, ChevronLeft, Gavel, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+interface Plaintiff {
+  id: string;
+  firstNames: string;
+  powerOfAttorney: string | null;
+}
+
 export default async function PlaintiffsPage({
   params,
 }: {
@@ -72,7 +78,7 @@ export default async function PlaintiffsPage({
         </div>
 
         {/* Additional Plaintiffs */}
-        {data.plaintiffs.map((p: any, idx: number) => (
+        {data.plaintiffs.map((p: Plaintiff, idx: number) => (
           <div key={idx} className="bg-slate-900 rounded-3xl border border-white/5 p-6 hover:border-blue-500/30 transition-all group shadow-xl">
              <div className="flex items-center gap-4 mb-4">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 font-black text-xs">

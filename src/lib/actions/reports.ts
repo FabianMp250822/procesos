@@ -7,7 +7,7 @@ import { desc, eq, and } from "drizzle-orm";
 /**
  * Generates a CSV string from an array of objects
  */
-function toCSV(data: any[]): string {
+function toCSV(data: Record<string, unknown>[]): string {
   if (data.length === 0) return "";
   const headers = Object.keys(data[0]).join(";");
   const rows = data.map(obj => 

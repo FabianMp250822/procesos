@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { rateLimit } from "@/lib/rate-limit";
 
-export async function createClient(prevState: any, formData: FormData) {
+export async function createClient(prevState: unknown, formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
@@ -112,7 +112,7 @@ export async function createClient(prevState: any, formData: FormData) {
 
     revalidatePath("/dashboard/clients");
     
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create Client Error:", error);
     throw error;
   }

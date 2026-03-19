@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
-export async function createLawyer(prevState: any, formData: FormData) {
+export async function createLawyer(prevState: unknown, formData: FormData) {
   const session = await auth();
   if (!session) throw new Error("Unauthorized");
 
@@ -34,7 +34,7 @@ export async function createLawyer(prevState: any, formData: FormData) {
     });
 
     revalidatePath("/dashboard/lawyers");
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create Lawyer Error:", error);
     return { error: "Error al crear abogado. Es posible que la identificación ya exista." };
   }

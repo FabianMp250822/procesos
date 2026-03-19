@@ -100,7 +100,7 @@ export async function createProcess(formData: FormData): Promise<void> {
       sentenceTribunal,
     });
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create Process Error:", error);
     throw error;
   }
@@ -163,7 +163,7 @@ export async function updateProcess(id: number, formData: FormData): Promise<voi
 
     revalidatePath(`/dashboard/processes/${id}`);
     revalidatePath("/dashboard/processes");
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update Process Error:", error);
     throw error;
   }
@@ -173,12 +173,12 @@ export async function updateProcess(id: number, formData: FormData): Promise<voi
 
 export async function deleteProcess(id: number): Promise<void> {
   const session = await auth();
-  if ((session?.user as any)?.level !== 'A') throw new Error("Acceso denegado: Se requieren permisos de administrador.");
+  if ((session?.user as { role?: string })?.role !== 'X') throw new Error("Acceso denegado: Se requieren permisos de administrador.");
 
   try {
     await db.delete(processes).where(eq(processes.id, id));
     revalidatePath("/dashboard/processes");
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete Process Error:", error);
     throw error;
   }
@@ -260,7 +260,7 @@ export async function addAnnotation(formData: FormData): Promise<void> {
     });
 
     revalidatePath(`/dashboard/processes/${processId}`);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Add Annotation Error:", error);
     throw error;
   }
@@ -284,7 +284,7 @@ export async function updateAnnotation(id: number, formData: FormData): Promise<
     }).where(eq(annotations.id, id));
 
     revalidatePath(`/dashboard/processes/${processId}`);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update Annotation Error:", error);
     throw error;
   }
@@ -297,7 +297,7 @@ export async function deleteAnnotation(id: number, processId: number): Promise<v
   try {
     await db.delete(annotations).where(eq(annotations.id, id));
     revalidatePath(`/dashboard/processes/${processId}`);
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete Annotation Error:", error);
     throw error;
   }

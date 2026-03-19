@@ -33,7 +33,7 @@ export async function getClients(query?: string, page: number = 1) {
 export async function getGroups() {
   try {
     const result = await db.execute(sql`SELECT DISTINCT grupo as grupos FROM clientes WHERE grupo IS NOT NULL AND grupo != ''`);
-    if (result[0] && (result[0] as unknown as any[]).length > 0) return result[0] as unknown as any[];
+    if (result[0] && (result[0] as unknown as unknown[]).length > 0) return result[0] as unknown as unknown[];
     return [{ grupos: "ELECTRIFICADORA" }, { grupos: "COLPENSIONES" }, { grupos: "CORELCA" }];
   } catch {
     return [{ grupos: "ELECTRIFICADORA" }, { grupos: "COLPENSIONES" }, { grupos: "CORELCA" }];

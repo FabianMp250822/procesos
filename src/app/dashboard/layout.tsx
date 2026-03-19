@@ -109,7 +109,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-5">
             <div className="text-right hidden sm:block border-r border-white/10 pr-5">
               <p className="text-[11px] font-black text-white uppercase tracking-widest">{session?.user?.name}</p>
-              <p className="text-[9px] text-[#C59D5F] font-black uppercase tracking-[0.2em] mt-0.5">{(session?.user as any)?.role === 'X' ? 'ADMINISTRADOR' : 'CONSULTOR'}</p>
+              <p className="text-[9px] text-[#C59D5F] font-black uppercase tracking-[0.2em] mt-0.5">{(session?.user as unknown as { role?: string })?.role === 'X' ? 'ADMINISTRADOR' : 'CONSULTOR'}</p>
             </div>
             <form action={async () => {
               "use server";

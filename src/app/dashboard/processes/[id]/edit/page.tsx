@@ -25,7 +25,7 @@ async function EditProcessContent({ id }: { id: string }) {
   const lawyersList = await getLawyers();
   const clientsList = await getClients();
 
-  const updateProcessWithId = updateProcess.bind(null, id);
+  const updateProcessWithId = updateProcess.bind(null, processId);
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-10 pb-32">

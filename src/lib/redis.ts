@@ -33,7 +33,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function setCache(key: string, value: any, ttlSeconds: number = 3600) {
+export async function setCache(key: string, value: unknown, ttlSeconds: number = 3600) {
   if (!redis) return;
   try {
     await redis.set(key, JSON.stringify(value), "EX", ttlSeconds);

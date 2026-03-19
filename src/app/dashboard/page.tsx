@@ -96,7 +96,7 @@ export default async function DashboardPage() {
                         <span className="text-[10px] font-black text-[#C59D5F] bg-[#C59D5F]/10 px-3 py-1 rounded-lg border border-[#C59D5F]/20">{note.date}</span>
                       </div>
                       <p className="text-sm text-[#4A4A4A] leading-relaxed font-bold group-hover/item:text-[#012340] transition-colors capitalize">
-                        "{note.annotation?.toLowerCase() || ""}"
+                        &quot;{note.annotation?.toLowerCase() || ""}&quot;
                       </p>
                       <Link href={`/dashboard/processes/${note.processId}`} className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C59D5F] mt-5 inline-flex items-center gap-2 hover:translate-x-1 transition-all">
                         Consultar Proceso <ChevronRight size={14} />
@@ -162,7 +162,7 @@ export default async function DashboardPage() {
     );
   }
 
-function ShortcutCard({ href, title, description }: any) {
+function ShortcutCard({ href, title, description }: { href: string; title: string; description: string }) {
    return (
       <Link href={href} className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-lg hover:border-[#C59D5F]/50 hover:shadow-2xl transition-all group flex flex-col justify-end min-h-[140px] relative overflow-hidden">
          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-100 group-hover:text-[#C59D5F] transition-all">

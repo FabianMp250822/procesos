@@ -35,7 +35,7 @@ export default async function SearchPage({
             <Search className="text-blue-500" size={40} />
             Resultados de Búsqueda
           </h1>
-          <p className="text-slate-400 mt-2 font-medium">Buscando por: <span className="text-blue-400 font-black">"{q}"</span> — {totalResults} coincidencias encontradas.</p>
+          <p className="text-slate-400 mt-2 font-medium">Buscando por: <span className="text-blue-400 font-black">&quot;{q}&quot;</span> — {totalResults} coincidencias encontradas.</p>
         </div>
       </div>
 

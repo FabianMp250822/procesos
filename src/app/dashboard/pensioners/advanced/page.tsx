@@ -12,6 +12,9 @@ export default async function AdvancedPensionersPage({
     association?: string; 
     type?: string; 
     condition?: string;
+    id?: string;
+    firstNames?: string;
+    lastNames?: string;
   }>;
 }) {
   const filters = await searchParams;
@@ -108,7 +111,18 @@ export default async function AdvancedPensionersPage({
   );
 }
 
-async function SearchResults({ filters }: { filters: any }) {
+interface AdvancedFilters {
+  group?: string;
+  district?: string;
+  association?: string;
+  type?: string;
+  condition?: string;
+  id?: string;
+  firstNames?: string;
+  lastNames?: string;
+}
+
+async function SearchResults({ filters }: { filters: AdvancedFilters }) {
   // Only search if any filter is set (not "1")
   const hasFilters = Object.values(filters).some(v => v && v !== "1");
   if (!hasFilters) return null;
@@ -135,7 +149,7 @@ async function SearchResults({ filters }: { filters: any }) {
           </thead>
           <tbody className="divide-y divide-border/50">
             {results.map((r) => (
-              <tr key={r.auto} className="hover:bg-primary/5 transition-colors group">
+              <tr key={r.clientId} className="hover:bg-primary/5 transition-colors group">
                 <td className="px-6 py-4 font-black text-primary">{r.folderNumber}</td>
                 <td className="px-6 py-4 font-bold">{r.clientId}</td>
                 <td className="px-6 py-4 font-black uppercase tracking-tight">{r.firstNames} {r.lastNames}</td>

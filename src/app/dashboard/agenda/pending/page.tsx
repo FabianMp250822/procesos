@@ -38,7 +38,16 @@ export default async function PendingAgendaPage() {
   );
 }
 
-function TaskCard({ task }: { task: any }) {
+interface Task {
+  id: number;
+  title: string | null;
+  description: string | null;
+  date: string | null;
+  hour: string | null;
+  status: string | null;
+}
+
+function TaskCard({ task }: { task: Task }) {
   const isPending = task.status === "PENDIENTE";
   
   return (
