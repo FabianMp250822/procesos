@@ -1,4 +1,4 @@
-import { mysqlTable, serial, varchar, text, int, bigint, date, mysqlEnum } from "drizzle-orm/mysql-core";
+import { mysqlTable, serial, varchar, text, int, bigint, date, mysqlEnum, timestamp } from "drizzle-orm/mysql-core";
 
 export const users = mysqlTable("usuarios", {
   id: varchar("usuario", { length: 255 }).primaryKey(),
@@ -152,6 +152,7 @@ export const processes = mysqlTable("procesos", {
   magistrateCorte: varchar("magistrado_corte", { length: 30 }).notNull(),
   casacion: varchar("casacion", { length: 30 }).notNull(),
   description: varchar("descripcion", { length: 255 }).notNull(),
+  deletedAt: timestamp("eliminado_el"),
 });
 
 // Table: demandantes

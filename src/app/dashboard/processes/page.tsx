@@ -46,13 +46,22 @@ export default async function ProcessesPage({
             <p className="text-sm text-[#4A4A4A]/60 font-bold uppercase tracking-widest mt-1">Control Estratégico de Expedientes Jurídicos</p>
           </div>
         </div>
-        <Link 
-          href="/dashboard/processes/new"
-          className="group flex items-center gap-3 px-8 py-4 bg-[#012340] text-white rounded-2xl hover:bg-[#012450] transition-all shadow-lg hover:scale-105 active:scale-95 font-black uppercase tracking-wider text-xs"
-        >
-          <Plus size={20} className="group-hover:rotate-90 transition-transform text-[#C59D5F]" />
-          Registrar Proceso
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link 
+            href="/dashboard/processes/trash"
+            className="flex items-center gap-3 px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl hover:bg-slate-200 transition-all font-black uppercase tracking-wider text-xs"
+          >
+            <MoreHorizontal size={20} />
+            Papelera
+          </Link>
+          <Link 
+            href="/dashboard/processes/new"
+            className="group flex items-center gap-3 px-8 py-4 bg-[#012340] text-white rounded-2xl hover:bg-[#012450] transition-all shadow-lg hover:scale-105 active:scale-95 font-black uppercase tracking-wider text-xs"
+          >
+            <Plus size={20} className="group-hover:rotate-90 transition-transform text-[#C59D5F]" />
+            Registrar Proceso
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xl">

@@ -2,12 +2,13 @@
 
 import { db } from "@/db/db.server";
 import { processes, clients, users, annotations } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, isNull, isNotNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { rateLimit } from "@/lib/rate-limit";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { annotationSchema, updateAnnotationSchema } from "@/lib/validations/processes";
 
 const s3Client = new S3Client({
   region: "auto",
@@ -176,13 +177,34 @@ export async function deleteProcess(id: number): Promise<void> {
   if ((session?.user as { role?: string })?.role !== 'X') throw new Error("Acceso denegado: Se requieren permisos de administrador.");
 
   try {
-    await db.delete(processes).where(eq(processes.id, id));
+    // Perform Soft Delete
+    await db.update(processes)
+      .set({ deletedAt: new Date() })
+      .where(eq(processes.id, id));
+
     revalidatePath("/dashboard/processes");
+    revalidatePath("/dashboard/processes/trash");
   } catch (error) {
-    console.error("Delete Process Error:", error);
+    console.error("Soft Delete Process Error:", error);
     throw error;
   }
-  redirect("/dashboard/processes");
+}
+
+export async function restoreProcess(id: number): Promise<void> {
+  const session = await auth();
+  if ((session?.user as { role?: string })?.role !== 'X') throw new Error("Acceso denegado: Se requieren permisos de administrador.");
+
+  try {
+    await db.update(processes)
+      .set({ deletedAt: null })
+      .where(eq(processes.id, id));
+
+    revalidatePath("/dashboard/processes");
+    revalidatePath("/dashboard/processes/trash");
+  } catch (error) {
+    console.error("Restore Process Error:", error);
+    throw error;
+  }
 }
 
 export async function addAnnotation(formData: FormData): Promise<void> {
@@ -192,15 +214,21 @@ export async function addAnnotation(formData: FormData): Promise<void> {
   const { success } = await rateLimit(`user:${session.user.id}:addAnnotation`, 20, 60);
   if (!success) throw new Error("Acción bloqueada temporalmente: Demasiados intentos.");
 
-  const processId = parseInt(formData.get("processId") as string);
-  const annotation = formData.get("anotacion") as string;
-  const type = formData.get("tipo") as string;
+  // Validate with Zod
+  const validatedData = annotationSchema.parse({
+    processId: formData.get("processId"),
+    fecha_actuacion: formData.get("fecha_actuacion"),
+    tipo: formData.get("tipo"),
+    anotacion: formData.get("anotacion"),
+    despachos: formData.get("despachos"),
+    estado_procesal: formData.get("estado_procesal") || formData.get("anotacion"),
+    visualizar: formData.get("visualizar") === "on" ? "SI" : "NO",
+  });
+
+  const { processId, anotacion: annotation, tipo: type, estado_procesal: proceduralStatus, despachos: courts, visualizar } = validatedData;
   const limitDate = formData.get("fecha_limite") as string;
   const limitHour = (formData.get("hora_limite") as string) || "11:45:00";
-  const dateStr = (formData.get("fecha_actuacion") as string); // Format expected: YYYY-MM-DD from input[type=date]
-  const visualizar = formData.get("visualizar") === "on" ? "SI" : "NO";
-  const proceduralStatus = (formData.get("estado_procesal") as string) || annotation;
-  const courts = parseInt(formData.get("despachos") as string) || 1;
+  const dateStr = validatedData.fecha_actuacion;
 
   // Format date to D-M-Y for legacy consistency
   let formattedDate = new Date().toLocaleDateString("es-CO").replace(/\//g, '-');
@@ -270,13 +298,18 @@ export async function updateAnnotation(id: number, formData: FormData): Promise<
   const session = await auth();
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  const processId = parseInt(formData.get("processId") as string);
-  const annotation = formData.get("anotacion") as string;
-  const type = formData.get("tipo") as string;
+  // Validate with Zod
+  const validatedData = updateAnnotationSchema.parse({
+    processId: formData.get("processId"),
+    tipo: formData.get("tipo") || undefined,
+    anotacion: formData.get("anotacion") || undefined,
+    despachos: formData.get("despachos") || undefined,
+    estado_procesal: formData.get("estado_procesal") || undefined,
+    visualizar: formData.get("visualizar") === "on" ? "SI" : "NO",
+  });
+
+  const { processId, anotacion: annotation, tipo: type, estado_procesal: proceduralStatus, despachos: courts, visualizar } = validatedData;
   const limitDate = formData.get("fecha_limite") as string;
-  const visualizar = formData.get("visualizar") === "on" ? "SI" : "NO";
-  const proceduralStatus = (formData.get("estado_procesal") as string) || annotation;
-  const courts = parseInt(formData.get("despachos") as string) || 1;
 
   // Handle File Upload parity
   const file = formData.get("archivo_adjunto") as File;

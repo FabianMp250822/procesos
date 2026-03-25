@@ -1,10 +1,12 @@
 import { db } from "@/db/db.server";
 import { processes, annotations, annexes, clients, lawyers, processTypes, pensionerDocuments, parameters, pretensionDocumentMapping, demandantes, deceasedData, familyGroups, folders } from "@/db/schema";
-import { eq, desc, like, or, and } from "drizzle-orm";
+import { eq, desc, like, or, and, isNull, isNotNull } from "drizzle-orm";
 
 export async function getProcessDetails(id: number) {
   try {
-    const processData = await db.select().from(processes).where(eq(processes.id, id)).limit(1);
+    const processData = await db.select().from(processes)
+      .where(and(eq(processes.id, id), isNull(processes.deletedAt)))
+      .limit(1);
     if (processData.length === 0) return null;
 
     const process = processData[0];
@@ -71,6 +73,7 @@ export async function getProcesses(query?: string, page: number = 1, filters?: {
 
   try {
     const conditions = [];
+    conditions.push(isNull(processes.deletedAt));
 
     if (query) {
       conditions.push(or(
