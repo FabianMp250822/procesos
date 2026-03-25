@@ -274,14 +274,53 @@ export async function updateAnnotation(id: number, formData: FormData): Promise<
   const annotation = formData.get("anotacion") as string;
   const type = formData.get("tipo") as string;
   const limitDate = formData.get("fecha_limite") as string;
+  const visualizar = formData.get("visualizar") === "on" ? "SI" : "NO";
+  const proceduralStatus = (formData.get("estado_procesal") as string) || annotation;
+  const courts = parseInt(formData.get("despachos") as string) || 1;
+
+  // Handle File Upload parity
+  const file = formData.get("archivo_adjunto") as File;
+  let documentName = "";
+  let fileUrl = "";
+
+  if (file && file.size > 0) {
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+    const key = `annotations/${processId}/${fileName}`;
+
+    try {
+      await s3Client.send(
+        new PutObjectCommand({
+          Bucket: process.env.R2_BUCKET_NAME!,
+          Key: key,
+          Body: buffer,
+          ContentType: file.type,
+        })
+      );
+      documentName = file.name;
+      fileUrl = `${process.env.R2_PUBLIC_URL}/${key}`;
+    } catch (s3Error) {
+      console.error("S3 Upload Error for Annotation Update:", s3Error);
+      throw new Error("Error al subir el archivo adjunto.");
+    }
+  }
 
   try {
-    await db.update(annotations).set({
+    const updateData: any = {
       annotation,
       type,
       limitDate,
-      proceduralStatus: annotation,
-    }).where(eq(annotations.id, id));
+      visualize: visualizar,
+      proceduralStatus,
+      courts,
+    };
+
+    if (fileUrl) {
+      updateData.documentName = documentName;
+      updateData.fileUrl = fileUrl;
+    }
+
+    await db.update(annotations).set(updateData).where(eq(annotations.id, id));
 
     revalidatePath(`/dashboard/processes/${processId}`);
   } catch (error) {

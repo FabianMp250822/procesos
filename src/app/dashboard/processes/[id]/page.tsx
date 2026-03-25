@@ -32,6 +32,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/auth";
 import { AnnotationModal } from "@/components/AnnotationModal";
+import { ActuacionesTable } from "@/components/processes/ActuacionesTable";
 
 interface FamilyMember {
   firstNames: string | null;
@@ -47,14 +48,45 @@ interface Annotation {
   annotation: string | null;
   proceduralStatus: string | null;
   limitDate: string | null;
+  limitHour: string | null;
   fileUrl: string | null;
+  documentName?: string | null;
 }
 
 interface Annex {
   id: number;
   fileName: string | null;
   description: string | null;
-  r2Url: string | null;
+  filePath: string | null;
+}
+
+function DetailField({ label, value, bold, mono, italic, blue, badge }: { 
+  label: string; 
+  value: any; 
+  bold?: boolean; 
+  mono?: boolean; 
+  italic?: boolean; 
+  blue?: boolean;
+  badge?: boolean;
+}) {
+  return (
+    <div className="space-y-1.5 group">
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 group-hover:text-blue-500 transition-colors">{label}</p>
+      <div className={`bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 min-h-[44px] flex items-center shadow-sm group-hover:border-blue-200 transition-all ${badge && value === 'ACTIVO' ? 'bg-blue-50/50' : ''}`}>
+        {badge ? (
+          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+            value === 'ACTIVO' ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-red-500 text-white shadow-lg shadow-red-500/30'
+          }`}>{value || 'INACTIVO'}</span>
+        ) : (
+          <p className={`text-[12px] truncate ${
+            bold ? 'font-extrabold text-slate-900' : 'font-bold text-slate-600'
+          } ${mono ? 'font-mono text-blue-600' : ''} ${italic ? 'italic text-slate-500 font-medium' : ''} ${blue ? 'text-blue-600 uppercase' : ''}`}>
+            {value || '-'}
+          </p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default async function ProcessDetailsPage({
@@ -138,149 +170,108 @@ export default async function ProcessDetailsPage({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Main Info Column */}
         <div className="lg:col-span-2 space-y-12">
-          <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-10 shadow-xl shadow-slate-200/20">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                <Scale size={24} />
-              </div>
-              <h2 className="text-xl font-bold text-slate-800 uppercase tracking-tight">Detalles del Expediente</h2>
+          {/* Información General (Legacy 2-Column Parity) */}
+        <section className="bg-white rounded-[2.5rem] border border-slate-200/60 shadow-xl shadow-slate-200/20 overflow-hidden">
+          <div className="px-10 py-8 border-b border-slate-100 flex items-center gap-4 bg-slate-50/50">
+            <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20">
+              <Scale size={24} />
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-              {[
-                { label: "Radicado Inicial", value: data.radicadoIni, mono: true },
-                { label: "N° Registro", value: data.id },
-                { label: "Carpeta Principal", value: data.folderNumber },
-                { label: "Carpeta Secundaria", value: data.folderNumber2 || '-' },
-                { label: "Demandante", value: data.clientName, bold: true },
-                { label: "Documento Demandante", value: data.clientId },
-                { label: "Demandado", value: data.defendantName, bold: true },
-                { label: "Documento Demandado", value: data.defendantId },
-                { label: "Apoderado", value: data.lawyerName },
-                { label: "Despacho Origen", value: data.court },
-              ].map((item, i) => (
-                <div key={i} className="space-y-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</p>
-                  <p className={`text-sm ${item.bold ? 'font-extrabold text-slate-900' : 'font-semibold text-slate-700'} ${item.mono ? 'font-mono text-blue-600' : ''}`}>{item.value}</p>
-                </div>
-              ))}
+            <div>
+              <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Información General</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Paridad Legacy 1:1</p>
             </div>
-
-            <div className="mt-12 pt-10 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-10">
-              <div className="space-y-6">
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Jurisdicción</p>
-                    <p className="text-sm font-bold text-slate-700">{data.jurisdiction || 'N/A'}</p>
-                 </div>
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clase de Proceso</p>
-                    <p className="text-sm font-bold text-slate-700">{data.processClass || 'LABORAL'}</p>
-                 </div>
-              </div>
-              <div className="space-y-6">
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Línea de Negocio</p>
-                    <p className="text-sm font-bold text-blue-600 uppercase">{(data as unknown as Record<string, unknown>).businessLine as string || '-'}</p>
-                 </div>
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Radicación Completa</p>
-                    <p className="text-sm font-mono text-slate-600">{(data as unknown as Record<string, unknown>).radicadoUlt as string || '-'}</p>
-                 </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Tribunal & Sentencias Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-lg shadow-slate-200/20">
-              <div className="flex items-center gap-3 mb-8">
-                <Gavel size={20} className="text-blue-500" />
-                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Tribunal y Corte</h3>
-              </div>
-              <div className="space-y-6">
-                <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Magistrado Tribunal</p>
-                  <p className="text-xs font-bold text-slate-700 italic">{data.magistrate || 'PENDIENTE'}</p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl space-y-1">
-                  <p className="text-[9px] font-black text-slate-400 uppercase">Magistrado Corte</p>
-                  <p className="text-xs font-bold text-slate-700 italic">{((data as unknown as Record<string, unknown>).magistrateCorte as string) || 'PENDIENTE'}</p>
-                </div>
-              </div>
-            </section>
-
-            <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-lg shadow-slate-200/20">
-              <div className="flex items-center gap-3 mb-8">
-                <Briefcase size={20} className="text-blue-500" />
-                <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Sentencias</h3>
-              </div>
-              <div className="space-y-4">
-                <div className="p-4 border border-slate-100 rounded-2xl">
-                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2">1ra Instancia</p>
-                  <p className="text-xs font-bold text-slate-600 leading-relaxed">{data.sentenceJuzgado || 'NO REGISTRA'}</p>
-                </div>
-                <div className="p-4 border border-slate-100 rounded-2xl">
-                  <p className="text-[9px] font-black text-slate-400 uppercase mb-2">2da Instancia</p>
-                  <p className="text-xs font-bold text-slate-600 leading-relaxed">{data.sentenceTribunal || 'NO REGISTRA'}</p>
-                </div>
-              </div>
-            </section>
           </div>
+          
+          <div className="p-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              {/* Row 1 */}
+              <DetailField label="N° CARPETA 1:" value={data.folderNumber} />
+              <DetailField label="NOMBRES DEL DEMANDANTE:" value={data.clientName} bold />
+              
+              {/* Row 2 */}
+              <DetailField label="No. CARPETA 2:" value={(data as any).folderNumber2 || '-'} />
+              <DetailField label="N° DE DOCUMENTO DEMANDANTE:" value={data.clientId} />
+              
+              {/* Row 3 */}
+              <DetailField label="DESPACHO ORIGEN:" value={data.court} />
+              <DetailField label="NOMBRES DEL DEMANDADO:" value={data.defendantName} bold />
+              
+              {/* Row 4 */}
+              <DetailField label="N° DEL RADICADO INICIAL:" value={data.radicadoIni} mono />
+              <DetailField label="N° DE DOCUMENTO DEMANDADO O NIT:" value={data.defendantId} />
+              
+              {/* Row 5 */}
+              <DetailField label="FECHA DEL RADICADO INICIAL:" value={data.creationDate} />
+              <DetailField label="NOMBRES DEL APODERADO:" value={data.lawyerName} />
+              
+              {/* Row 6 */}
+              <DetailField label="N° DEL RADICADO DEL TRIBUNAL:" value={(data as any).radicadoTribunal || '-'} />
+              <DetailField label="N° DE DOCUMENTO DEL APODERADO:" value={data.lawyerId} />
+              
+              {/* Row 7 */}
+              <DetailField label="MAGISTRADO DEL TRIBUNAL:" value={data.magistrate} italic />
+              <DetailField label="NEGOCIO:" value={(data as any).businessLine} blue />
+              
+              {/* Row 8 */}
+              <DetailField label="JURISDICCIÓN:" value={data.jurisdiction} />
+              <DetailField label="NÚMERO RADICACIÓN (COMPLETO):" value={(data as any).radicadoUlt} mono />
+              
+              {/* Row 9 */}
+              <DetailField label="CLASE DE PROCESO:" value={data.processClass} />
+              <DetailField label="RADICADO DE LA CORTE:" value={(data as any).radicadoCorte || '-'} />
+              
+              {/* Row 10 */}
+              <DetailField label="ESTADO DE PROCESO:" value={data.status} badge />
+              <DetailField label="MAGISTRADO DE LA CORTE:" value={(data as any).magistrateCorte || '-'} italic />
+              
+              {/* Row 11 */}
+              <DetailField label="SENTENCIA DEL JUZGADO:" value={data.sentenceJuzgado} />
+              <DetailField label="CASACIÓN:" value={(data as any).casacion || '-'} />
+              
+              {/* Row 12 */}
+              <DetailField label="SENTENCIA DEL TRIBUNAL:" value={data.sentenceTribunal} />
+              <div className="hidden md:block"></div>
 
-          {/* Deceased & Financial Data */}
-          {(data.deceased || data.folder) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {data.deceased && (
-                <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-lg shadow-slate-200/20 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Heart size={80} className="text-red-500" />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-8">
-                      <Heart size={20} className="text-red-500" />
-                      <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Datos del Causante</h3>
-                    </div>
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Nacimiento</p>
-                        <p className="text-xs font-bold text-slate-700">{data.deceased.deceasedBirthDate || '-'}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-[9px] font-black text-slate-400 uppercase">Fallecimiento</p>
-                        <p className="text-xs font-bold text-slate-700">{data.deceased.deathDate || '-'}</p>
-                      </div>
-                      <div className="col-span-2 p-3 bg-red-50 rounded-xl border border-red-100">
-                        <p className="text-[9px] font-black text-red-400 uppercase mb-1">Vínculo / Curador</p>
-                        <p className="text-xs font-bold text-red-700 uppercase">{data.deceased.relationship} - {data.deceased.curatorName || 'SIN CURADOR'}</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              )}
+              {/* Row 13 - Full Width Description */}
+              <div className="md:col-span-2 mt-4">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-1">DESCRIPCIÓN:</p>
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 min-h-[100px]">
+                  <p className="text-xs font-bold text-slate-700 leading-relaxed uppercase">{data.description || 'SIN DESCRIPCIÓN RELEVANTE'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
 
-              {data.folder && (
-                <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-lg shadow-slate-200/20 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                    <Calculator size={80} className="text-emerald-500" />
+
+          {/* Deceased Data */}
+          {data.deceased && (
+            <div className="grid grid-cols-1 gap-8">
+              <section className="bg-white rounded-[2.5rem] border border-slate-200/60 p-8 shadow-lg shadow-slate-200/20 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <Heart size={80} className="text-red-500" />
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <Heart size={20} className="text-red-500" />
+                    <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Datos del Causante</h3>
                   </div>
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-8">
-                      <Calculator size={20} className="text-emerald-500" />
-                      <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Mesadas e ISS</h3>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black text-slate-400 uppercase">Nacimiento</p>
+                      <p className="text-xs font-bold text-slate-700">{data.deceased.deceasedBirthDate || '-'}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                        <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Mesada Jub</p>
-                        <p className="text-sm font-bold text-emerald-700">${data.folder.initialMesadaJubilation || '0'}</p>
-                      </div>
-                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                        <p className="text-[9px] font-black text-emerald-500 uppercase mb-1">Mesada ISS</p>
-                        <p className="text-sm font-bold text-emerald-700">${data.folder.initialMesadaIss || '0'}</p>
-                      </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black text-slate-400 uppercase">Fallecimiento</p>
+                      <p className="text-xs font-bold text-slate-700">{data.deceased.deathDate || '-'}</p>
+                    </div>
+                    <div className="col-span-2 p-3 bg-red-50 rounded-xl border border-red-100">
+                      <p className="text-[9px] font-black text-red-400 uppercase mb-1">Vínculo / Curador</p>
+                      <p className="text-xs font-bold text-red-700 uppercase">{data.deceased.relationship} - {data.deceased.curatorName || 'SIN CURADOR'}</p>
                     </div>
                   </div>
-                </section>
-              )}
+                </div>
+              </section>
             </div>
           )}
         </div>
@@ -306,7 +297,26 @@ export default async function ProcessDetailsPage({
             </div>
             
             <div className="p-8 space-y-8">
-               <div className="space-y-4">
+               {data.folder && (
+                 <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Calculator size={18} className="text-emerald-500" />
+                      <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mesadas e ISS</h4>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm">
+                        <p className="text-[8px] font-black text-emerald-500 uppercase mb-1">Mesada Jub</p>
+                        <p className="text-xs font-bold text-emerald-700">${data.folder.initialMesadaJubilation || '0'}</p>
+                      </div>
+                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm">
+                        <p className="text-[8px] font-black text-emerald-500 uppercase mb-1">Mesada ISS</p>
+                        <p className="text-xs font-bold text-emerald-700">${data.folder.initialMesadaIss || '0'}</p>
+                      </div>
+                    </div>
+                 </div>
+               )}
+
+               <div className="space-y-4 pt-8 border-t border-slate-100">
                   <div className="flex items-center gap-3">
                     <Users size={18} className="text-slate-400" />
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Grupo Familiar</h4>
@@ -357,118 +367,9 @@ export default async function ProcessDetailsPage({
     </div>
 
       {/* Full Width Sections: Timeline & Annexes */}
-      <div className="max-w-4xl mx-auto space-y-12 px-6">
-        {/* Timeline (Actuaciones) */}
-        <section className="bg-white rounded-[3rem] border border-slate-200/60 overflow-hidden shadow-2xl shadow-slate-200/40">
-          <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-500/20">
-                <History size={24} />
-              </div>
-              <div>
-                <h2 className="text-xl font-black text-slate-800 uppercase tracking-tight">Historial de Actuaciones</h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Línea de tiempo del proceso</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-10">
-            <div className="space-y-8 relative">
-               {/* Vertical Line */}
-               <div className="absolute left-[27px] top-2 bottom-2 w-0.5 bg-slate-100 hidden md:block"></div>
-
-               {[...data.annotations].sort((a: Annotation, b: Annotation) => new Date(b.date || '').getTime() - new Date(a.date || '').getTime()).map((note: Annotation) => (
-                 <div key={note.id} className="relative pl-0 md:pl-16 group">
-                   {/* Timeline dot */}
-                   <div className="absolute left-[20px] top-1 w-4 h-4 rounded-full bg-white border-4 border-blue-500 hidden md:block z-10 group-hover:scale-125 transition-transform shadow-sm"></div>
-
-                   <div className="bg-white border border-slate-200 rounded-[2rem] p-8 space-y-6 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 relative">
-                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                       <div className="flex flex-wrap items-center gap-3">
-                         <span className="text-[10px] font-black bg-blue-50 text-blue-600 px-3 py-1 rounded-full border border-blue-100 uppercase tracking-widest">
-                           {note.type || 'ACTUACIÓN'}
-                         </span>
-                         <span className={`text-[10px] font-black px-3 py-1 rounded-full border uppercase tracking-widest ${
-                           note.visualize === 'SI' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'
-                         }`}>
-                           {note.visualize === 'SI' ? 'VISIBLE' : 'INTERNO'}
-                         </span>
-                         {note.courts && (
-                            <span className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest px-3 py-1 bg-slate-50 rounded-full border border-slate-200">
-                              <Landmark size={12} className="text-blue-500" />
-                              {note.courts === 1 ? 'JUZGADO' : note.courts === 2 ? 'TRIBUNAL' : 'CORTE'}
-                            </span>
-                         )}
-                       </div>
-                       <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-                         <Calendar size={14} className="text-blue-500" />
-                         {note.date}
-                       </div>
-                     </div>
-
-                     <div className="space-y-6 text-slate-700">
-                        <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                             <FileText size={14} className="text-blue-500" /> Detalle
-                          </p>
-                          <p className="text-sm leading-relaxed font-medium whitespace-pre-wrap">{note.annotation}</p>
-                        </div>
-
-                        {note.proceduralStatus && note.proceduralStatus !== note.annotation && (
-                          <div className="p-6 bg-blue-50/30 rounded-3xl border border-blue-100/50">
-                             <p className="text-[10px] font-black text-blue-500/60 uppercase tracking-widest mb-3 flex items-center gap-2">
-                               <Shield size={14} /> Estado Procesal
-                             </p>
-                             <p className="text-sm font-semibold">{note.proceduralStatus}</p>
-                          </div>
-                        )}
-
-                        {note.limitDate && (
-                          <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-4">
-                            <div className="p-2 bg-white rounded-lg shadow-sm">
-                              <AlertCircle size={16} className="text-amber-500" />
-                            </div>
-                            <div>
-                               <p className="text-[9px] font-black text-amber-600/60 uppercase tracking-widest">Límite</p>
-                               <p className="text-xs font-black text-amber-700">{note.limitDate}</p>
-                            </div>
-                          </div>
-                        )}
-                     </div>
-
-                     <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
-                        {note.fileUrl && (
-                          <a 
-                            href={note.fileUrl} 
-                            target="_blank" 
-                            className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20"
-                          >
-                            <ExternalLink size={14} /> Ver Documento
-                          </a>
-                        )}
-                        <button className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                          <Edit2 size={18} />
-                        </button>
-                        <form action={async () => {
-                          "use server";
-                          await deleteAnnotation(note.id, processId);
-                        }}>
-                          <button type="submit" className="p-2.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                            <Trash2 size={18} />
-                          </button>
-                        </form>
-                     </div>
-                   </div>
-                 </div>
-               ))}
-               {data.annotations.length === 0 && (
-                 <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
-                   <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Sin actuaciones</p>
-                 </div>
-               )}
-            </div>
-          </div>
-        </section>
+      <div className="max-w-7xl mx-auto space-y-12 px-6">
+        {/* Historial de Actuaciones (Interactive Table) */}
+        <ActuacionesTable annotations={data.annotations} processId={processId} />
 
         {/* Digital Folder (R2) */}
         <section className="bg-white rounded-[3rem] border border-slate-200/60 overflow-hidden shadow-xl shadow-slate-200/20">

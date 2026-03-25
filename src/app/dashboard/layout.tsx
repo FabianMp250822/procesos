@@ -45,14 +45,14 @@ export default async function DashboardLayout({
           <nav className="hidden xl:flex items-center gap-1 ml-12">
             {/* GESTIONES */}
             <NavDropdown label="Gestiones">
-              <NavSubMenu label="GESTIÓN DE CONTACTOS">
-                <NavLink href="/dashboard/clients/new" icon={<UserPlus size={14} />} label="AGREGAR CONTACTO" />
-                <NavLink href="/dashboard/clients" icon={<UserSearch size={14} />} label="CONSULTAR CONTACTOS" />
-              </NavSubMenu>
               <NavSubMenu label="GESTIÓN DE CLIENTES">
-                <NavLink href="/dashboard/pensioners/new" icon={<UserPlus size={14} />} label="AGREGAR CLIENTE" />
-                <NavLink href="/dashboard/pensioners" icon={<FolderOpen size={14} />} label="CONSULTAR CLIENTES" />
-                <NavLink href="/dashboard/pensioners/advanced" icon={<Filter size={14} />} label="BÚSQ. AVANZADA" />
+                <NavLink href="/dashboard/clients/new" icon={<UserPlus size={14} />} label="AGREGAR CLIENTE" />
+                <NavLink href="/dashboard/clients" icon={<UserSearch size={14} />} label="CONSULTAR CLIENTE" />
+              </NavSubMenu>
+              <NavSubMenu label="GESTIÓN DE CLIENTES (ARCHIVO)">
+                <NavLink href="/dashboard/pensioners/new" icon={<UserPlus size={14} />} label="AGREGAR CLIENTE (ARC)" />
+                <NavLink href="/dashboard/pensioners" icon={<FolderOpen size={14} />} label="CONSULTAR CLIENTE (ARC)" />
+                <NavLink href="/dashboard/pensioners/advanced" icon={<Filter size={14} />} label="BÚSQ. AVANZADA (ARC)" />
               </NavSubMenu>
               <NavSubMenu label="GESTIÓN DE ABOGADOS">
                 <NavLink href="/dashboard/lawyers/new" icon={<Scale size={14} />} label="AGREGAR ABOGADO" />
@@ -68,10 +68,10 @@ export default async function DashboardLayout({
 
             {/* CONSULTAS */}
             <NavDropdown label="CONSULTAS VARIAS">
-              <NavLink href="/dashboard/pensioners" icon={<Users size={14} />} label="CLIENTES" />
-              <NavLink href="/dashboard/pensioners/advanced" icon={<Filter size={14} />} label="CLIENTES AVANZADA" />
-              <NavLink href="/dashboard/clients" icon={<UserSearch size={14} />} label="CONTACTOS" />
-              <NavLink href="/dashboard/contacts/data" icon={<FileText size={14} />} label="DATOS CONTACTOS" />
+              <NavLink href="/dashboard/pensioners" icon={<Users size={14} />} label="CLIENTES (ARCHIVO)" />
+              <NavLink href="/dashboard/pensioners/advanced" icon={<Filter size={14} />} label="CLIENTES (ARC) AVANZADA" />
+              <NavLink href="/dashboard/clients" icon={<UserSearch size={14} />} label="CLIENTES" />
+              <NavLink href="/dashboard/contacts/data" icon={<FileText size={14} />} label="DATOS CLIENTES" />
               <NavLink href="/dashboard/pensioners" icon={<ShieldCheck size={14} />} label="PENSIONADOS" />
               <NavLink href="/dashboard/processes" icon={<Search size={14} />} label="PROCESOS" />
               <NavLink href="/dashboard/processes/advanced" icon={<Filter size={14} />} label="PROCESOS AVANZADA" />
