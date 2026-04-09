@@ -16,7 +16,8 @@ export async function getAgendaReportData(from?: string, to?: string) {
 
   const audiences = await db.select({
     id: annotations.id,
-    date: annotations.limitDate,
+    annotationDate: annotations.date,
+    limitDate: annotations.limitDate,
     hour: annotations.limitHour,
     proceduralStatus: annotations.proceduralStatus,
     court: processes.court,
@@ -41,10 +42,16 @@ export async function getAgendaReportData(from?: string, to?: string) {
     .orderBy(asc(annotations.limitDate), asc(annotations.limitHour));
 
   return {
-    audiences: audiences.map(a => ({
-      ...a,
-      day: a.date ? getDayName(a.date) : ""
-    })),
+    audiences: audiences.map(a => {
+      const finalDate = (a.limitDate && a.limitDate !== '0' && a.limitDate !== '') 
+        ? a.limitDate 
+        : (a.annotationDate || '');
+      return {
+        ...a,
+        date: finalDate,
+        day: finalDate ? getDayName(finalDate) : ""
+      };
+    }),
     generalTasks: generalTasks.map(t => ({
       date: t.limitDate,
       hour: t.limitHour,
@@ -55,20 +62,38 @@ export async function getAgendaReportData(from?: string, to?: string) {
 }
 
 function getDayName(dateStr: string) {
-  if (!dateStr || dateStr.trim() === "") return "";
+  if (!dateStr || dateStr.trim() === "" || dateStr === "0") return "";
   try {
-    // Handle both DD/MM/YYYY and DD-MM-YYYY
-    const separator = dateStr.includes("/") ? "/" : "-";
-    const parts = dateStr.split(separator).map(s => s.trim()).map(Number);
+    const daysName = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
     
-    if (parts.length === 3) {
-      const [d, m, y] = parts;
-      // Basic validation
-      if (d > 0 && d <= 31 && m > 0 && m <= 12 && y > 1900) {
-        const date = new Date(y, m - 1, d);
-        if (!isNaN(date.getTime())) {
-          const days = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-          return days[date.getDay()];
+    // Check if format is YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr.trim())) {
+      const [y, m, d] = dateStr.trim().split("-").map(Number);
+      const date = new Date(y, m - 1, d);
+      return daysName[date.getDay()];
+    }
+
+    // Check if format is DD-MMM-YYYY or DD/MM/YYYY
+    const isNamedMonth = /[a-zA-Z]/.test(dateStr);
+    if (isNamedMonth) {
+      // Something like 08-Apr-2026
+      const date = new Date(dateStr.trim());
+      // Date might shift due to timezone if not careful, but DD-MMM-YYYY is parsed as local midnight
+      if (!isNaN(date.getTime())) {
+        return daysName[date.getDay()];
+      }
+    } else {
+      // DD/MM/YYYY or DD-MM-YYYY
+      const separator = dateStr.includes("/") ? "/" : "-";
+      const parts = dateStr.split(separator).map(s => s.trim()).map(Number);
+      
+      if (parts.length === 3) {
+        const [d, m, y] = parts;
+        if (d > 0 && d <= 31 && m > 0 && m <= 12 && y > 1900) {
+          const date = new Date(y, m - 1, d);
+          if (!isNaN(date.getTime())) {
+            return daysName[date.getDay()];
+          }
         }
       }
     }
