@@ -8,7 +8,7 @@ export function ExportButton({
   action 
 }: { 
   label: string; 
-  action: () => Promise<{ filename: string; content: string }> 
+  action: () => Promise<{ filename: string; content: string; type?: string }> 
 }) {
   const [loading, setLoading] = useState(false);
 

@@ -1,6 +1,6 @@
 import { db } from "@/db/db.server";
 import { processes, annotations, annexes, clients, lawyers, processTypes, pensionerDocuments, parameters, pretensionDocumentMapping, demandantes, deceasedData, familyGroups, folders } from "@/db/schema";
-import { eq, desc, like, or, and, isNull, isNotNull, sql } from "drizzle-orm";
+import { eq, desc, like, or, and, isNull, isNotNull, sql, count } from "drizzle-orm";
 
 export async function getProcessDetails(id: number) {
   try {
@@ -113,7 +113,7 @@ export async function getProcesses(query?: string, page: number = 1, filters?: {
       .limit(limit)
       .offset(offset);
 
-    const totalCount = await db.select({ count: db.count() })
+    const totalCount = await db.select({ count: count() })
       .from(processes)
       .where(conditions.length > 0 ? and(...conditions) : undefined);
 
@@ -139,7 +139,7 @@ export async function getDeletedProcesses(page: number = 1) {
       .limit(limit)
       .offset(offset);
 
-    const totalCount = await db.select({ count: db.count() })
+    const totalCount = await db.select({ count: count() })
       .from(processes)
       .where(isNotNull(processes.deletedAt));
 

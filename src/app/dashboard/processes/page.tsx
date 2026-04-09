@@ -1,6 +1,9 @@
 import { getProcesses } from "@/lib/data/processes";
 import { Search, Plus, MoreHorizontal, Scale, Gavel, User, LayoutGrid, List as ListIcon, ChevronRight, ShieldCheck, Briefcase, Landmark } from "lucide-react";
 import Link from "next/link";
+import ProcessFilters from "@/components/processes/ProcessFilters";
+import { ExportButton } from "@/components/reports/export-button";
+import { exportProcesos } from "@/lib/actions/reports";
 
 interface ProcessListItem {
   id: number;
