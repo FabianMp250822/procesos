@@ -15,8 +15,22 @@ export function ExportButton({
   async function handleExport() {
     setLoading(true);
     try {
-      const { filename, content } = await action();
-      const blob = new Blob(["\uFEFF" + content], { type: "text/csv;charset=utf-8;" });
+      const { filename, content, type } = await action();
+      let blob: Blob;
+      
+      if (type === "xlsx") {
+        // Convert base64 to blob
+        const byteCharacters = atob(content);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        blob = new Blob([byteArray], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      } else {
+        blob = new Blob(["\uFEFF" + content], { type: "text/csv;charset=utf-8;" });
+      }
+
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
       link.setAttribute("href", url);

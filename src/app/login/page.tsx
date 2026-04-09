@@ -24,13 +24,13 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Credenciales incorrectas");
+        setError("Acceso denegado: Usuario o contraseña incorrectos. Verifique mayúsculas/minúsculas.");
       } else {
         router.push("/dashboard");
         router.refresh();
       }
     } catch (err) {
-      setError("Ocurrió un error inesperado");
+      setError("Error crítico de sistema: Verifique la conexión a la base de datos.");
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 import { db } from "@/db/db.server";
 import { processes, annotations, annexes, clients, lawyers, processTypes, pensionerDocuments, parameters, pretensionDocumentMapping, demandantes, deceasedData, familyGroups, folders } from "@/db/schema";
-import { eq, desc, like, or, and, isNull, isNotNull } from "drizzle-orm";
+import { eq, desc, like, or, and, isNull, isNotNull, sql } from "drizzle-orm";
 
 export async function getProcessDetails(id: number) {
   try {
@@ -67,6 +67,7 @@ export async function getProcesses(query?: string, page: number = 1, filters?: {
   jurisdiccion?: string;
   fecha_desde?: string;
   fecha_hasta?: string;
+  num_carpeta?: string;
 }) {
   const limit = 20;
   const offset = (page - 1) * limit;
@@ -95,6 +96,15 @@ export async function getProcesses(query?: string, page: number = 1, filters?: {
       if (filters.identidad) conditions.push(eq(processes.clientId, parseInt(filters.identidad)));
       if (filters.negocio) conditions.push(like(processes.businessLine, `%${filters.negocio}%`));
       if (filters.jurisdiccion) conditions.push(eq(processes.jurisdiction, filters.jurisdiccion));
+      if (filters.num_carpeta) conditions.push(like(processes.folderNumber, `%${filters.num_carpeta}%`));
+      
+      // SQL date parsing for legacy DD/MM/YYYY formatting
+      if (filters.fecha_desde) {
+        conditions.push(sql`STR_TO_DATE(${processes.creationDate}, '%d/%m/%Y') >= ${filters.fecha_desde}`);
+      }
+      if (filters.fecha_hasta) {
+        conditions.push(sql`STR_TO_DATE(${processes.creationDate}, '%d/%m/%Y') <= ${filters.fecha_hasta}`);
+      }
     }
 
     const data = await db.select().from(processes)
@@ -103,10 +113,44 @@ export async function getProcesses(query?: string, page: number = 1, filters?: {
       .limit(limit)
       .offset(offset);
 
-    return data;
+    const totalCount = await db.select({ count: db.count() })
+      .from(processes)
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
+    return {
+      data,
+      totalPages: Math.ceil(totalCount[0].count / limit),
+      currentPage: page
+    };
   } catch (error) {
     console.error("Get Processes Error:", error);
-    return [];
+    return { data: [], totalPages: 0, currentPage: 1 };
+  }
+}
+
+export async function getDeletedProcesses(page: number = 1) {
+  const limit = 20;
+  const offset = (page - 1) * limit;
+
+  try {
+    const data = await db.select().from(processes)
+      .where(isNotNull(processes.deletedAt))
+      .orderBy(desc(processes.deletedAt))
+      .limit(limit)
+      .offset(offset);
+
+    const totalCount = await db.select({ count: db.count() })
+      .from(processes)
+      .where(isNotNull(processes.deletedAt));
+
+    return {
+      data,
+      totalPages: Math.ceil(totalCount[0].count / limit),
+      currentPage: page
+    };
+  } catch (error) {
+    console.error("Get Deleted Processes Error:", error);
+    return { data: [], totalPages: 0, currentPage: 1 };
   }
 }
 

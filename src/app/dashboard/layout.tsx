@@ -17,7 +17,8 @@ import {
   Users,
   Plus,
   Scale,
-  Clock
+  Clock,
+  BarChart3
 } from "lucide-react";
 import { ExportButton } from "@/components/reports/export-button";
 import { exportDemandantes, exportProcesos, exportInvDoc } from "@/lib/actions/reports";
@@ -89,6 +90,8 @@ export default async function DashboardLayout({
 
             {/* REPORTES */}
             <NavDropdown label="Reportes">
+              <NavLink href="/dashboard/reports" icon={<BarChart3 size={14} />} label="DASHBOARD ADM." />
+              <div className="h-px bg-white/5 my-1" />
               <NavLink href="/dashboard/reports/contacts-ppa" icon={<Users size={14} />} label="CONTACTOS PPA" />
               <NavLink href="/dashboard/reports/annotations" icon={<FileText size={14} />} label="ANOTACIONES" />
               <div className="h-px bg-white/5 my-1" />
